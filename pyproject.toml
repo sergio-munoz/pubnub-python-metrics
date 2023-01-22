@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pubnub_python_metrics"
+authors = [{ name = "Sergio Munoz", email = "sergio.munoz@pubnub.com" }]
+description = "PubNub Python Metrics."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.7"
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+
+
+dependencies = [
+  "python-dotenv",
+  "requests"
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/sergio-munoz/pubnub_python_metrics/"
+"Bug Tracker" = "https://github.com/sergio-munoz/pubnub_python_metrics/issues"
+Documentation = "https://github.com/sergio-munoz/pubnub_python_metrics#readme"
+Issues = "https://github.com/sergio-munoz/pubnub_python_metrics/issues"
+Source = "https://github.com/sergio-munoz/pubnub_python_metrics"
+
+[project.scripts]
+pubnub-python-metrics = "pubnub_python_metrics.run:main"
+
+[tool.hatch.version]
+path = "src/pubnub_python_metrics/__about__.py"
+
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]",
+  #"pytest",
+  #"pytest-cov",
+]
+
+#[tool.hatch.build]
+#include = [
+    #"pubnub_python_metrics/*.py",
+    #"tests/",
+#]
+#[tool.hatch.build.targets.wheel.hooks.mypyc]
+#dependencies = ["hatch-mypyc"]
+
+#[build.targets.wheel.hooks.mypyc]
+#include = ["/src/pubnub_python_metrics"]
+#exclude = ["__main__.py"]
+
+[tool.hatch.envs.default.scripts]
+#cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=pubnub_pytools --cov=tests"
+#no-cov = "cov --no-cov"
+cov = "coverage run --omit tests/*,scripts/*  -m unittest"
+report = "coverage report"
+pubnub-python-metrics = "pubnub_python_metrics.run:main"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["37", "38", "39", "310", "311"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "src/pubnub_python_metrics/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

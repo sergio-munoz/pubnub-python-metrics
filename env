@@ -1,0 +1,4 @@
+PACKAGE_NAME=pubnub_python_metrics
+PACKAGE_VERSION=0.1.0
+PN_CONSOLE_EMAIL=xx@x.com
+PN_CONSOLE_PASSWORD=yourpassword
