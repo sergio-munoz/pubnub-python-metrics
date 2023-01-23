@@ -1,6 +1,7 @@
 """SRP PubNub User to interact with PubNub Web Console."""
 
 from ..metrics import pubnub_internal_rest_api as api
+from ..metrics.metrics_parser import MetricBuilder
 
 
 class PubNubUser:
@@ -51,8 +52,31 @@ class PubNubUser:
             print(error)
             return False
         return True
-
+    
     def all_metrics(self):
+        metrics = []
+        # Builder with token as param:
+        #mp = MetricBuilder(token=self.token)\
+                #.parse_metric(app_id, "transaction", "2022-12-01", "2022-12-02")\
+
+        mB = MetricBuilder()\
+            .parse\
+                .set_token(self.token)
+
+        try:
+            for _, app_ids in self.apps.items():
+                for app_id in app_ids:
+                    #metrics.append(
+                        #api.get_app_based_usage(app_id, self.token, "transaction", "2022-12-01", "2022-12-02")
+                    metric = mB.parse_metric(app_id, "transaction", "2022-12-01", "2022-12-02") 
+                    metrics.append(metric)
+        except Exception as error:
+            print(error)
+            return None
+        return metrics
+        
+
+    def all_metrics_og(self):
         metrics = []
         try:
             for _, app_ids in self.apps.items():
