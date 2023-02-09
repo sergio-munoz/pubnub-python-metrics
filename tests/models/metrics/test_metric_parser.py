@@ -61,11 +61,48 @@ class TestMetricParser(TestCase):
         # test method
         test_method(first_app_id, user.token, "transaction", "2023-01-01", "2023-01-01")
 
-        # write to file
+        # write to file. Uncomment to write your own test data.
+        # with open(os.path.join(self.current_dir, "test_data", f"{test_name}.json"), "w") as f:
+        # f.write(json.dumps(metrics.raw))
+
+        # read from file
+        expected = None
         with open(
-            os.path.join(self.current_dir, "test_data", f"{test_name}.json"), "w"
+            os.path.join(self.current_dir, "test_data", f"{test_name}.json"), "r"
         ) as f:
-            f.write(json.dumps(metrics.raw))
+            expected = json.load(f)
+
+        self.assertEqual(metrics.raw, expected)
+
+    def test_get_key_based_usage(self):
+        # Set test
+        _frame = inspect.currentframe()
+        test_name = inspect.getframeinfo(_frame).function  # type: ignore
+
+        # Set test method
+        metrics = metric_parser.MetricParser()
+        test_method = metrics.get_key_based_usage
+
+        # Set from dotenv. Override with your own
+        email = self.config.parsed_dotenv["PN_CONSOLE_EMAIL"]
+        password = self.config.parsed_dotenv["PN_CONSOLE_PASSWORD"]
+
+        # Log in and get first app_id
+        user = pubnub_user.PubNubUser(email, password)
+        user.login()
+        user.load_all()
+        first_app_id = user.apps[user.accounts[0]][0]  # type: ignore
+
+        # get first key_id
+        keys = user.get_keys(first_app_id)
+        first_key_id = keys[0]
+
+        # test method
+        test_method(first_key_id, user.token, "transaction", "2023-01-01", "2023-01-01")
+
+        # write to file
+        # with open(os.path.join(self.current_dir, "test_data", f"{test_name}.json"), "w") as f:
+        # f.write(json.dumps(metrics.raw))
 
         # read from file
         expected = None

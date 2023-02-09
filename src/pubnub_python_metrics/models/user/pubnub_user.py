@@ -3,6 +3,7 @@ from .auth_user import AuthUser
 from ...api.pubnub import internal_rest_api as api
 from ...metrics.metrics_parser import MetricBuilder
 
+
 class PubNubUser(AuthUser):
     """PubNub User Class"""
 
@@ -11,7 +12,7 @@ class PubNubUser(AuthUser):
         super().__init__(email, password, user, token)
         self.accounts = None
         self.apps = None
-        self.error = ''
+        self.error = ""
 
     def __str__(self):
         return f"{self.__dict__}"
@@ -29,39 +30,40 @@ class PubNubUser(AuthUser):
         except Exception as error:
             self.error = error
         return self
-    
+
     def __iter__(self):
         for _, app_ids in self.apps.items():
             for app_id in app_ids:
                 yield app_id
-    
+
     def get_apps(self):
         return self.apps
-    
+
     def get_keys(self, app_id, page=1, limit=100):
-        return api.get_keys(app_id, self.token, page, limit)
-    
+        ret = []
+        keys = api.get_keys(app_id, self.token, page, limit)
+        for result in keys["result"]:
+            ret.append(result["id"])
+        return ret
+
     def all_metrics(self):
         metrics = []
 
-        mB = MetricBuilder()\
-            .parse\
-                .set_token(self.token)
+        mB = MetricBuilder().parse.set_token(self.token)
 
         try:
             for app_id in self:
-                metric = mB.parse_metric(app_id, "transaction", "2022-12-01", "2022-12-02") 
+                metric = mB.parse_metric(
+                    app_id, "transaction", "2022-12-01", "2022-12-02"
+                )
                 metrics.append(metric)
         except Exception as error:
             print(error)
             return None
         return metrics
-            
+
     def get_all_metrics_by_date(self, start, end):
-        mB = MetricBuilder()\
-            .parse\
-                .set_token(self.token)\
-                .set_date(start, end)
+        mB = MetricBuilder().parse.set_token(self.token).set_date(start, end)
         try:
             for app_id in self:
                 metric = mB.parse_metric(app_id, "transaction", start, end)
