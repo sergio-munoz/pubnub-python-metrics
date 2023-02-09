@@ -9,6 +9,8 @@ from probable_fiesta.logger.builder.logger_factory import LoggerFactory
 from src.pubnub_python_metrics.models.user import pubnub_user
 from src.pubnub_python_metrics.models.metrics import metric_parser
 from src.pubnub_python_metrics.models.metrics import metric_pandas
+from src.pubnub_python_metrics.models.metrics import metric
+
 
 from unittest import TestCase
 
@@ -67,6 +69,45 @@ class TestMetricPandas(TestCase):
         mp = metric_pandas.MetricPandas(raw)
         res = mp.extract_total("transactions_total")
         self.assertEqual(res, 0.0)
+
+    def test_metric_pandas_map_tx_api_file(self):
+        # Set test
+        _frame = inspect.currentframe()
+        test_name = inspect.getframeinfo(_frame).function  # type: ignore
+
+        # set raw metrics from file
+        raw = None
+        with open(
+            os.path.join(self.current_dir, "test_data", f"{test_name}.json"), "r"
+        ) as f:
+            raw = json.load(f)
+        mp = metric_pandas.MetricPandas(raw)
+        res = mp.extract_total("transactions_total")
+        self.assertEqual(res, 1655.0)
+
+        path = os.path.join(self.current_dir, "test_data", f"{test_name}.csv")
+        reader = mp.read_csv(path)
+        print("--READER--")
+        print(reader)
+
+        # Create a metrics
+        mB = metric.MetricBuilder()
+        metrics = mB.with_dataframe_a(reader, mp)
+        print("--METRICS--")
+        for m in metrics:
+            # print(m)
+            pass
+        tot = sum([x.total for x in metrics if x.type == "edg"])
+        self.assertEqual(tot, 640.0)
+        tot = sum([x.total for x in metrics if x.type == "rep"])
+        print("rep: ", tot)
+        self.assertEqual(tot, 1015.0)
+        tot = sum([x.total for x in metrics if x.type == "sig"])
+        print("sig: ", tot)
+        self.assertEqual(tot, 0)
+        tot = sum([x.total for x in metrics if x.type == "ma"])
+        print("ma: ", tot)
+        self.assertEqual(tot, 0)
 
     def test_get_and_write_metrics(self):
         class MyDotEnvDef:

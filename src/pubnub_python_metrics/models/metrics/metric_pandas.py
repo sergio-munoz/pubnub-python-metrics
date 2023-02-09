@@ -2,7 +2,7 @@ import pandas as pd
 
 
 class MetricPandas:
-    def __init__(self, raw, txt_api_file=None):
+    def __init__(self, raw):
         self.metrics = self.load_raw(raw)
 
     @staticmethod
@@ -25,6 +25,14 @@ class MetricPandas:
             res = self.metrics[name]  # type: ignore
             df = pd.DataFrame(res.to_list())
             return df["sum"].sum()
+        except Exception as e:
+            print(e)
+            return None
+
+    def read_csv(self, csv_file):
+        try:
+            df = pd.read_csv(csv_file)
+            return df
         except Exception as e:
             print(e)
             return None
