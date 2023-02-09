@@ -1,7 +1,7 @@
 """Unit test file for auth_user.py."""
 from probable_fiesta.config.builder.config_builder import ConfigBuilder
 
-from src.pubnub_python_metrics.authorization import auth_user
+from src.pubnub_python_metrics.models.user import auth_user
 
 from unittest import TestCase
 

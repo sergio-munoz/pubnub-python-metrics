@@ -1,7 +1,7 @@
 """Unit test file for pubnub_user.py."""
 from probable_fiesta.config.builder.config_builder import ConfigBuilder
 
-from src.pubnub_python_metrics.pubnub import pubnub_user
+from src.pubnub_python_metrics.models.user import pubnub_user
 
 from unittest import TestCase
 

@@ -1,6 +1,6 @@
 """Metrics parser."""
 
-from ..pubnub import internal_rest_api as api
+from ..api.pubnub import internal_rest_api as api
 
 class MyMetric:
     def __init__(self):

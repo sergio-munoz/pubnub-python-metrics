@@ -1,4 +1,4 @@
-from ..pubnub import internal_rest_api as api
+from ...api.pubnub import internal_rest_api as api
 
 class AuthUser:
     def __init__(self, email=None, password=None, user=None, token=None):

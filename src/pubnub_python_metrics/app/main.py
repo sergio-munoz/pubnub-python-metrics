@@ -7,7 +7,7 @@ from probable_fiesta.logger.builder.logger_factory import LoggerFactory
 from probable_fiesta.app.builder.context_factory import ContextFactory as CF
 from probable_fiesta.app.builder.app_builder import AppBuilder
 
-from ..pubnub.pubnub_user import PubNubUser
+from ..models.user.pubnub_user import PubNubUser
 from ..metrics.pandas_metrics import PandasMetrics
 
 class MyDotEnvDef(ded):

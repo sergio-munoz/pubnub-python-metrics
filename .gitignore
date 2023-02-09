@@ -3,6 +3,11 @@
 
 # Python Virtual Environments
 venv/
+virtualenv/
+
+# testdata
+
+**/*test_data/
 
 # Vscode
 .vscode/

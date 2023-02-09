@@ -3,8 +3,8 @@ import json
 
 from probable_fiesta.config.builder.config_builder import ConfigBuilder
 
-from src.pubnub_python_metrics.pubnub import pubnub_user
-from src.pubnub_python_metrics.pubnub import pubnub_user
+from src.pubnub_python_metrics.models.user import pubnub_user
+from src.pubnub_python_metrics.models.user import pubnub_user
 from src.pubnub_python_metrics.metrics import pandas_metrics
 from src.pubnub_python_metrics.metrics import metrics_parser
 from src.pubnub_python_metrics.metrics import pubnub_metrics
@@ -49,6 +49,7 @@ class TestMetricsParser(TestCase):
         #print(type(metrics.raw))
         loaded = json.loads(metrics.raw)
         #print("\n--app based usage--\n", (loaded))
+
 
         pm = pandas_metrics.PandasMetrics((loaded)) # get from active_keys
         pm.load()
