@@ -29,7 +29,8 @@ class MetricPandas:
             print(e)
             return None
 
-    def read_csv(self, csv_file):
+    @staticmethod
+    def read_csv(csv_file):
         try:
             df = pd.read_csv(csv_file)
             return df

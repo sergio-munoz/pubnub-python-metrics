@@ -39,7 +39,11 @@ class MetricBuilder:
         self.total = total
         return self
 
-    def with_dataframe_a(self, dataframe, metric_pandas):
+    def with_csv_file(self, csv_file, metric_pandas) -> list:
+        reader = metric_pandas.read_csv(csv_file)
+        return self.with_dataframe(reader, metric_pandas)
+
+    def with_dataframe(self, dataframe, metric_pandas) -> list:
         metrics = []
         if isinstance(dataframe, pd.DataFrame):
             for index, row in dataframe.iterrows():

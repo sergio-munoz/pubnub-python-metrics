@@ -42,6 +42,7 @@ class TestMetricParser(TestCase):
         # Set test
         _frame = inspect.currentframe()
         test_name = inspect.getframeinfo(_frame).function  # type: ignore
+        test_path = os.path.join(self.current_dir, "test_data", test_name)
 
         # Set test method
         metrics = metric_parser.MetricParser()
@@ -67,9 +68,7 @@ class TestMetricParser(TestCase):
 
         # read from file
         expected = None
-        with open(
-            os.path.join(self.current_dir, "test_data", f"{test_name}.json"), "r"
-        ) as f:
+        with open(f"{test_path}.json", "r") as f:
             expected = json.load(f)
 
         self.assertEqual(metrics.raw, expected)
@@ -78,6 +77,7 @@ class TestMetricParser(TestCase):
         # Set test
         _frame = inspect.currentframe()
         test_name = inspect.getframeinfo(_frame).function  # type: ignore
+        test_path = os.path.join(self.current_dir, "test_data", test_name)
 
         # Set test method
         metrics = metric_parser.MetricParser()
@@ -106,9 +106,7 @@ class TestMetricParser(TestCase):
 
         # read from file
         expected = None
-        with open(
-            os.path.join(self.current_dir, "test_data", f"{test_name}.json"), "r"
-        ) as f:
+        with open(f"{test_path}.json", "r") as f:
             expected = json.load(f)
 
         self.assertEqual(metrics.raw, expected)
