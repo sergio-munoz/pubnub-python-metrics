@@ -78,6 +78,20 @@ def get_apps_ids(apps) -> list:
 def get_app_based_usage(app_id, token, usage_type, start_date, end_date):
     """Get app based usage using PubNub internal rest api."""
     URL = f'https://admin.pubnub.com/api/v4/services/usage/legacy/usage?app_id={app_id}&usageType={usage_type}&file_format=json&start={start_date}&end={end_date}'
+#           'https://admin.pubnub.com/api/v4/services/usage/legacy/usage?app_id=<app_id>&usageType=<usage_type>&file_format=json&start=<start_data>&end=<end_date>' 
+
+    HEADER = {'X-Session-Token': token}
+
+    response = requests.get(url=URL, headers=HEADER)
+    decoded = (response.content.decode())
+    #parsed = json.loads(decoded)
+    #if 'error' in parsed:
+        #raise Exception("Invalid credentials")
+    #return parsed
+    return decoded
+
+def get_keys(app_id, token, page=1, limit=1):
+    URL = f'https://admin.pubnub.com/api/app/keys?app_id={app_id}&page={page}&limit={limit}'
     HEADER = {'X-Session-Token': token}
 
     response = requests.get(url=URL, headers=HEADER)
@@ -86,3 +100,16 @@ def get_app_based_usage(app_id, token, usage_type, start_date, end_date):
     if 'error' in parsed:
         raise Exception("Invalid credentials")
     return parsed
+
+def get_key_based_usage(key_id, token, usage_type, start_date, end_date):
+    """Get app based usage using PubNub internal rest api."""
+    URL = f'https://admin.pubnub.com/api/v4/services/usage/legacy/usage?key_id={key_id}&usageType={usage_type}&file_format=json&start={start_date}&end={end_date}'
+    HEADER = {'X-Session-Token': token}
+
+    response = requests.get(url=URL, headers=HEADER)
+    decoded = (response.content.decode())
+    #parsed = json.loads(decoded)
+    #if 'error' in parsed:
+        #raise Exception("Invalid credentials")
+    #return parsed
+    return decoded

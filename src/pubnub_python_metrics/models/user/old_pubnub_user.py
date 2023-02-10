@@ -1,7 +1,7 @@
 """SRP PubNub User to interact with PubNub Web Console."""
 
 from ..metrics import pubnub_internal_rest_api as api
-from ..metrics.metrics_parser import MetricBuilder
+from ...metrics.metrics_parser import MetricBuilder
 
 
 class PubNubUser:
