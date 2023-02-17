@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, constr, ValidationError
+from pydantic import BaseModel, Field, constr
 import pandas as pd
 from pydantic.main import ModelMetaclass
 from typing import List, Optional
@@ -11,7 +11,7 @@ class Metric(BaseModel):
     action: Optional[str] = Field(None, alias="action")
     label: Optional[str] = Field(None, alias="label")
     description: Optional[str] = Field(None, alias="description")
-    total: Optional[int] = Field(None, alias="total")
+    total: Optional[float] = Field(None, alias="total")
 
 
 class StrictCsvTxName(BaseModel):
@@ -30,6 +30,19 @@ class StrictCsvTxApi(BaseModel):
     action: str = Field(..., alias="action")
     label: str = Field(..., alias="label")
     description: str = Field(..., alias="description")
+
+
+class StrictPnApiMetric(BaseModel):
+    days: dict = Field(..., alias="days")
+    hours: dict = Field(..., alias="hours")
+    peak: float = Field(..., alias="peak")
+    peak_ts: int = Field(..., alias="peak_ts")
+    total: float = Field(..., alias="sum")
+
+
+class StrictPnMetric(BaseModel):
+    name: str
+    total: float
 
 
 # Dict Validator Example

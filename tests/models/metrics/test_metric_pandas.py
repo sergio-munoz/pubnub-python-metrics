@@ -37,6 +37,7 @@ class TestMetricPandas(TestCase):
         ) as f:
             raw = json.load(f)
         mp = metric_pandas.MetricPandas(raw)
+        print(mp.metrics.to_dict(orient="records"))
         res = mp.extract_total("transactions_total")
         self.assertEqual(res, 1655.0)
 
