@@ -12,7 +12,12 @@ from src.pubnub_python_metrics.models.metrics import metric_pandas
 from src.pubnub_python_metrics.models.metrics import metric
 from src.pubnub_python_metrics.models.metrics import metric_holder
 
-from src.pubnub_python_metrics.models.metrics.metric_model import Metric
+from src.pubnub_python_metrics.models.metrics.metric_model import (
+    Metric,
+    validate_data_schema,
+    StrictPnMetric,
+    StrictCsvTxType,
+)
 
 from src.pubnub_python_metrics.models.metrics import metric_csv_parser
 
@@ -177,8 +182,8 @@ class TestCsvParser(TestCase):
 
         # Test Validate
         mp = metric_pandas.MetricPandas(raw)
-        # print(mp.metrics.to_dict(orient="records"))
         strict_pn_metrics = mp.validate()
+        self.assertEqual(len(strict_pn_metrics), 146)
 
         df_api = metric_csv_parser.read_csv_file(
             os.path.join(self.current_dir, "test_data", f"test_validate_csv_tx_api.csv")
@@ -191,93 +196,67 @@ class TestCsvParser(TestCase):
             )
         )
         tx_type = metric_csv_parser.validate_csv_tx_type(df_type)
-        print(tx_type)
-        for col in tx_type.columns:
-            print(col)
-        for c in tx_type["metric"]:
-            # print(c)
-            pass
 
-        print(tx_api.loc[tx_api["metric"] == "transaction_signal"])
+        import pandas as pd
 
-        metrics = []
-        count_errors = 0
+        @validate_data_schema(data_schema=Metric)
+        def validate_metric(df) -> pd.DataFrame:
+            return df
+
+        def get_as_metric_tx(type: str, tx: pd.DataFrame, spm):
+            tx = tx.loc[tx["metric"] == spm.name]
+            if not tx.empty:
+                if type == "api":
+                    tx = validate_metric(tx)
+                    m = Metric(
+                        metric=spm.name,
+                        type=tx["type"].values[0],
+                        feature=tx["feature"].values[0],
+                        action=tx["action"].values[0],
+                        label=tx["label"].values[0],
+                        description=tx["description"].values[0],
+                        total=spm.total,
+                    )  # type:ignore
+                    return m
+                if type == "type":
+                    tx = validate_metric(tx)
+                    # get type from df
+                    type = tx["type"].values[0]  # type: ignore
+                    m = Metric(metric=spm.name, type=type, total=spm.total)  # type: ignore
+                    return m
+
+        metrics = {"type_metrics": [], "api_metrics": [], "metrics": []}
         for spm in strict_pn_metrics:
-            print("curr: ", spm)
-            try:
-                tx = tx_type.loc[tx_type["metric"] == spm.name]
-                if not tx.empty:
-                    d = tx.to_dict()
-                    print("tx dict: ", d)
-                    print("tx.get(): ", tx.get("type"))
-                    ok = d["type"]
-                    print("type ok: ", type(ok))
+            m = get_as_metric_tx("type", tx_type, spm)
+            if m:
+                print("TYPE METRIC: ", m)
+                metrics["type_metrics"].append(m)
+                continue
+            m = get_as_metric_tx("api", tx_api, spm)
+            if m:
+                print("API METRIC: ", m)
+                metrics["api_metrics"].append(m)
+            else:
+                m = Metric(
+                    metric=spm.name,
+                    total=spm.total,
+                )  # type:ignore
+                print("NORMAL METRIC: ", m)
+                metrics["metrics"].append(m)
 
-                    for k, v in ok.items():
-                        # print("k: ", k)
-                        # print("v: ", v)
-                        mm = Metric(
-                            # metric=spm.name, type=df.type, feature=df.feature, total=spm.total
-                            metric=spm.name,
-                            type=v,
-                            total=spm.total,
-                        )  # type:ignore
-                        print("adding metric: ", mm)
-                        metrics.append(mm)  # type:ignore
-                tx = tx_api.loc[tx_api["metric"] == spm.name]
-                # print("tx: ", tx)
-                if not tx.empty:
-                    # print(tx)
-                    # print(tx["type"].items())
-                    # print(tx["feature"].items())
-                    # print(tx["type"][0])
-                    mm = Metric(
-                        # metric=spm.name, type=df.type, feature=df.feature, total=spm.total
-                        metric=spm.name,
-                        type=tx["type"][0],
-                        feature=tx["feature"][0],
-                        action=tx["action"][0],
-                        label=tx["label"][0],
-                        description=tx["description"][0],
-                        total=spm.total,
-                    )  # type:ignore
-                    print("adding metric: ", mm)
-                    metrics.append(mm)  # type:ignore
-                else:
-                    mm = Metric(
-                        # metric=spm.name, type=df.type, feature=df.feature, total=spm.total
-                        metric=spm.name,
-                        total=spm.total,
-                    )  # type:ignore
-                    # metrics.append(mm)  # type:ignore
-                    pass
-            except Exception as e:
-                # print("Not found:", e)
-                count_errors += 1
-        print("Num errors parsing: ", count_errors)
-        # mm = Metric(metric=spm.name, total=spm.total)  # type:ignore
-        # print(mm)
-        print(metrics)
+        edg = sum([x.total for x in metrics["type_metrics"] if x.type == "edg"])
+        rep = sum([x.total for x in metrics["type_metrics"] if x.type == "rep"])
+        fun = sum([x.total for x in metrics["type_metrics"] if x.type == "fun"])
+        sig = sum([x.total for x in metrics["type_metrics"] if x.type == "sig"])
+        ma = sum([x.total for x in metrics["type_metrics"] if x.type == "ma"])
+        tot = sum([x.total for x in metrics["type_metrics"] if x.type == "tot"])
 
-        print("Printing metric by type:")
-        for m in metrics:
-            if m.type == "edg":
-                print("--printing edge--")
-                print(m.total)
-            elif m.type == "fun":
-                print("--printing fun--")
-                print(m.total)
-            elif m.type == "sig":
-                print("--printing sig--")
-                print(m.total)
-            elif m.type == "tot":
-                print("--printing tot--")
-                print(m.total)
-        print("--DONE---\n\n\n")
+        # Now assert with how we used to get metrics
         # Create MetricPandas
         mp = metric_pandas.MetricPandas(raw)
         res = mp.extract_total("transactions_total")
         self.assertEqual(res, 1655.0)
+        self.assertEqual(res, tot)
         # Create MetricBuilder
         csv_file = os.path.join(self.current_dir, "test_data", f"{test_name}.csv")
         mb = metric.MetricBuilder()
@@ -286,14 +265,18 @@ class TestCsvParser(TestCase):
         self.assertEqual(len(metrics), 82)
 
         # Check totals by type
-        tot = sum([x.total for x in metrics if x.type == "edg"])
-        self.assertEqual(tot, 640.0)
-        tot = sum([x.total for x in metrics if x.type == "rep"])
-        self.assertEqual(tot, 1015.0)
-        tot = sum([x.total for x in metrics if x.type == "sig"])
-        self.assertEqual(tot, 0)
-        tot = sum([x.total for x in metrics if x.type == "ma"])
-        self.assertEqual(tot, 0)
+        _tot = sum([x.total for x in metrics if x.type == "edg"])
+        self.assertEqual(_tot, 640.0)
+        self.assertEqual(_tot, edg)
+        _tot = sum([x.total for x in metrics if x.type == "rep"])
+        self.assertEqual(_tot, 1015.0)
+        self.assertEqual(_tot, rep)
+        _tot = sum([x.total for x in metrics if x.type == "sig"])
+        self.assertEqual(_tot, 0)
+        self.assertEqual(_tot, sig)
+        _tot = sum([x.total for x in metrics if x.type == "ma"])
+        self.assertEqual(_tot, 0)
+        self.assertEqual(_tot, ma)
 
         # Use metric holder to get easier access to metrics
         mh = metric_holder.MetricHolder(metrics)
