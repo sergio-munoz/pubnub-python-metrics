@@ -9,21 +9,58 @@ from probable_fiesta.logger.builder.logger_factory import LoggerFactory
 from src.pubnub_python_metrics.models.user import pubnub_user
 from src.pubnub_python_metrics.models.metrics import metric_parser
 from src.pubnub_python_metrics.models.metrics import metric_pandas
-from src.pubnub_python_metrics.models.metrics import metric
 
+from src.pubnub_python_metrics.config.variables import LoggerDef as ld
 
 from unittest import TestCase
 
 
 class TestMetricPandas(TestCase):
     def setUp(self) -> None:
-        super().setUp()
         _frame = inspect.currentframe()
         test_filename = inspect.getframeinfo(_frame).filename  # type: ignore
-        test_filename = os.path.basename(test_filename)
-        self.log = LoggerFactory.new_logger_get_logger(test_filename, "DEBUG")
+        test_filename = os.path.basename(test_filename).split(".")[0]
+        self.log = LoggerFactory.new_logger_get_logger(
+            test_filename, "DEBUG", directory=ld.DIRECTORY
+        )
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
-        return
+        return super().setUp()
+
+    def test_metric_pandas_validate(self):
+        # Set test
+        _frame = inspect.currentframe()
+        test_name = inspect.getframeinfo(_frame).function  # type: ignore
+        test_path = os.path.join(self.current_dir, "test_data", test_name)
+
+        # Validate 1
+        raw = None
+        with open(f"{test_path}_1.json", "r") as f:
+            raw = json.load(f)
+        mp = metric_pandas.MetricPandas(raw)
+        strict_pn_metrics = mp.validate()
+
+        self.assertEqual(len(strict_pn_metrics), 146)
+        self.assertEqual(str(strict_pn_metrics[0]), "name='active_keys' total=0.0")
+
+        # Validate 2
+        raw = None
+        with open(f"{test_path}_2.json", "r") as f:
+            raw = json.load(f)
+        mp = metric_pandas.MetricPandas(raw)
+        strict_pn_metrics = mp.validate()
+
+        self.assertEqual(len(strict_pn_metrics), 146)
+        self.assertEqual(str(strict_pn_metrics[0]), "name='active_keys' total=0.0")
+
+        # Validate 3
+        raw = None
+        with open(f"{test_path}_3.json", "r") as f:
+            raw = json.load(f)
+        mp = metric_pandas.MetricPandas(raw)
+        strict_pn_metrics = mp.validate()
+
+        self.assertEqual(len(strict_pn_metrics), 146)
+        self.assertEqual(str(strict_pn_metrics[0]), "name='active_keys' total=0.0")
 
     def test_metric_pandas_init(self):
         # Set test
@@ -37,6 +74,7 @@ class TestMetricPandas(TestCase):
         ) as f:
             raw = json.load(f)
         mp = metric_pandas.MetricPandas(raw)
+        print(mp.metrics.to_dict(orient="records"))
         res = mp.extract_total("transactions_total")
         self.assertEqual(res, 1655.0)
 
