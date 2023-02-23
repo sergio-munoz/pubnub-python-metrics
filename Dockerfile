@@ -1,11 +1,16 @@
 FROM python:3.9
 
-WORKDIR /pubnub_python_metrics
+WORKDIR /code
 
-COPY ./requirements.txt /pubnub_python_metrics/requirements.txt
+COPY requirements.txt /code
 
-RUN pip install --no-cache-dir --upgrade -r /pubnub_python_metrics/requirements.txt
+#RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --upgrade -r /code/requirements.txt
 
-COPY ./src/pubnub_python_metrics/ /pubnub_python_metrics/
+COPY src/ /code/src
 
-CMD [ "python3", "-m", "flask", "run", "app.application:main", "--host=0.0.0.0" ]
+COPY application.py /code
+
+ENV FLASK_APP=application.py
+
+CMD [ "python3", "-m", "flask", "run", "--host=0.0.0.0", "-p", "80" ]

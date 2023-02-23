@@ -1,19 +1,49 @@
 # pubnub-python-metrics
-PubNub Metrics API using python
 
-## Requirements
+Interact with PubNub Metrics API and get cost details using python via the public rest api, using docker or locally using the cli.
 
-This package depends on `probable-fiesta` which is a python base package builder with some extra features. You can find it here:
+## Public REST API
+---
 
-### MacOS
+Currently the testing version of the public rest api is hosted on AWS Elastic Beanstalk with __minimal capabilities__. Will move into a EC2 instance in the future.
 
 ```bash
-brew install python3
-pip3 install probable-fiesta
-pip3 install pubnub-python-metrics
+curl -i http://flask-env.eba-nam2bedw.us-east-1.elasticbeanstalk.com/v1/metrics/get_all_metrics \
+-X POST \
+-H 'Content-Type: application/json' \
+-d '{"email":"email","password":"password","start_date":"2020-01-01","end_date":"2020-01-02"}'
+```
+
+## Docker
+---
+
+Install in a docker component and run the flask application on port 80.
+
+```bash
+docker build -t pubnub-python-metrics .
+docker run --name ppm -p 80:80 pubnub-python-metrics
+```
+
+## Local CLI
+---
+
+### Local Package Install
+
+Use the build_install.sh script to install the package locally.
+
+```bash
+chmod +x ./scripts/build_install.sh
+./scripts/build_install.sh
+```
+
+### Local REST Server
+
+```bash
+python -m flask --app application.py run --host=0.0.0.0 -p 80
 ```
 
 ## Config
+---
 
 ## Environment Variables (DOTENV)
 
@@ -24,48 +54,15 @@ PN_CONSOLE_EMAIL=your_pn_console_email@your_domain.com
 PN_CONSOLE_PASSWORD=your_pn_console_password
 ```
 
-## Build and Install
+## Usage
+---
 
-### Install locally
+### CLI Flags
+===
 
 ```bash
-chmod +x ./scripts/build_install.sh
-./scripts/build_install.sh
-```
-
-## Usage
-
-```
 pubnub-python-metrics --help
 ```
-
-## Rest API
-
-### Start flask server locally
-
-```bash
-flask --app app.server --debug run
-```
-
-### Get Metrics by Date Range
-
-```bash
-curl -i http://127.0.0.1:5000/v1/metrics/get_all_metrics -X POST -H 'Content-Type: application/json' -d '{"email": "mail@email.com", "password": "password", "start_date": "2022-12-01", "end_date": "2022-12-30"}' 
-```
-
-## Public API
-
-```bash
-curl -i http://flask-env.eba-nam2bedw.us-east-1.elasticbeanstalk.com/v1/metrics/get_all_metrics \
--X POST \
--H 'Content-Type: application/json' \
--d '{"email":"email","password":"password","start_date":"2020-01-01","end_date":"2020-01-02"}'
-```
-
-## Future Flags
-
-### pubnub-python-metrics flags
-
 
 #### --all_metrics
 
@@ -87,27 +84,11 @@ __Note:__ Requires `--from` flag.
 
 Returns all metrics for cost. Example: `--cost "replicated" --from "yesterday"` --to "today"` 
 
+### REST API
+===
 
-### probable-fiesta flags
+#### Get Metrics by Date Range
 
-#### --help
-
-#### --version
-
-
-## Modules
-
-### Metrics
-
-### PubNub Console User
-
-__TODO:__ Move this to probable-fiesta
-## probable-fiesta Modules
-
-### Config
-
-### Commands
-
-### Parser
-
-### Arguments
+```bash
+curl -i http://127.0.0.1:80/v1/metrics/get_all_metrics -X POST -H 'Content-Type: application/json' -d '{"email": "mail@email.com", "password": "password", "start_date": "2022-12-01", "end_date": "2022-12-30"}' 
+```
