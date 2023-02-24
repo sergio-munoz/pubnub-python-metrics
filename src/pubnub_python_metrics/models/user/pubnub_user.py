@@ -2,6 +2,7 @@
 from .auth_user import AuthUser
 from ...api.pubnub import internal_rest_api as api
 from ...models.metrics.metric_parser import MetricParser
+from ...models.metrics.metric_pandas import MetricPandas
 
 
 class PubNubUser(AuthUser):
@@ -32,7 +33,7 @@ class PubNubUser(AuthUser):
         return self
 
     def __iter__(self):
-        for _, app_ids in self.apps.items():
+        for _, app_ids in self.apps.items():  # type: ignore
             for app_id in app_ids:
                 yield app_id
 
@@ -56,6 +57,30 @@ class PubNubUser(AuthUser):
                     app_id, self.token, "transaction", start, end
                 )
                 metrics.append(metric)
+        except Exception as error:
+            print(error)
+            return None
+        return metrics
+
+    def all_metrics_pandas(self, start, end):
+        _all_metrics = self.all_metrics(start, end)
+        metrics = []
+        try:
+            for m in _all_metrics:  # type: ignore
+                # Pandas metrics validation
+                pandas = MetricPandas(m)
+                metrics.append(pandas.validate())
+        except Exception as error:
+            print(error)
+            return None
+        return metrics
+
+    def all_metrics_total_by_name(self, start, end, name):
+        _pandas_metrics = self.all_metrics_pandas(start, end)
+        metrics = []
+        try:
+            for m in _pandas_metrics:  # type: ignore
+                metrics.append([x for x in m if x.name == name])
         except Exception as error:
             print(error)
             return None
