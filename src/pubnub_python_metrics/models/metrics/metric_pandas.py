@@ -1,4 +1,5 @@
 import pandas as pd
+from enum import Enum
 from .metric_model import validate_data_schema, StrictPnMetric, StrictPnApiMetric
 
 
@@ -55,6 +56,14 @@ class MetricPandas:
         except Exception as e:
             print(e)
             return None
+
+
+class MetricAttr(Enum):
+    metric_name = "name"
+    metric_type = "type"
+    metric_feature = "feature"
+    metric_action = "action"
+    metric_label = "label"
 
 
 @staticmethod

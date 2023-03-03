@@ -2,7 +2,7 @@
 from .auth_user import AuthUser
 from ...api.pubnub import internal_rest_api as api
 from ...models.metrics.metric_parser import MetricParser
-from ...models.metrics.metric_pandas import MetricPandas
+from ...models.metrics.metric_pandas import MetricPandas, MetricAttr
 
 
 class PubNubUser(AuthUser):
@@ -81,6 +81,46 @@ class PubNubUser(AuthUser):
         try:
             for m in _pandas_metrics:  # type: ignore
                 metrics.append([x for x in m if x.name == name])
+        except Exception as error:
+            print(error)
+            return None
+        return metrics
+
+    def all_metrics_total_by_type(self, start, end, type):
+        _pandas_metrics = self.all_metrics_pandas(start, end)
+        metrics = []
+        try:
+            for m in _pandas_metrics:  # type: ignore
+                metrics.append([x for x in m if x.type == type])
+        except Exception as error:
+            print(error)
+            return None
+        return metrics
+
+    def all_metrics_total_by_feature(self, start, end, feature):
+        _pandas_metrics = self.all_metrics_pandas(start, end)
+        metrics = []
+        try:
+            for m in _pandas_metrics:  # type: ignore
+                metrics.append([x for x in m if x.feature == feature])
+        except Exception as error:
+            print(error)
+            return None
+        return metrics
+
+    def all_metrics_total_by_attr(self, start, end, attr, value):
+        if not hasattr(MetricAttr, str(attr)):
+            print(f"Invalid attribute {attr}. Available attrs: ", end="")
+            print(" ".join([e.name for e in MetricAttr]))
+            return None
+        attr = MetricAttr[attr].value  # overwrite attr with enum value
+        print(attr)
+        _pandas_metrics = self.all_metrics_pandas(start, end)
+        metrics = []
+        try:
+            for m in _pandas_metrics:  # type: ignore
+                # metrics.append([x for x in m if x.attr == value])
+                metrics.append([x for x in m if getattr(x, attr) == value])
         except Exception as error:
             print(error)
             return None

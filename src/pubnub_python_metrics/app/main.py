@@ -51,7 +51,15 @@ def main(args=None):
     main_app = (
         aB.name.set_name("main_app")
         .arguments.set_arguments(args)
-        .set_executables(["version", "all_date", "all_pandas", "all_total_by_name"])
+        .set_executables(
+            [
+                "version",
+                "all_date",
+                "all_pandas",
+                "all_total_by_name",
+                "all_total_by_attr",
+            ]
+        )
         .args_parser.add_argument(
             "--version", action="store_true", help="show version builder"
         )
@@ -60,7 +68,9 @@ def main(args=None):
         .add_argument("--all-date", action="store_true", help="By date")
         .add_argument("--all-pandas", action="store_true", help="By date pandas")
         .add_argument("--all-total-by-name", action="store_true", help="By metric name")
+        .add_argument("--all-total-by-attr", type=str, help="By metric attribute")
         .add_argument("-name", "--metric-name", type=str, help="Metric name")
+        # .add_argument("-attr", "--metric-attr", type=str, help="Metric attribute")
         .add_argument(
             "-email", "--pn-console-email", type=str, help="PubNub Console email"
         )
@@ -120,6 +130,18 @@ def main(args=None):
         main_app.get_arg("metric_name"),
     )
     main_app.context.add_context(c3)  # type: ignore
+
+    # total_by
+    c4 = CF.new_context_one_new_command(
+        "all_total_by_attr",
+        "get_all_total_by_attr",
+        pu.all_metrics_total_by_attr,
+        start,
+        end,
+        main_app.get_arg("all_total_by_attr"),
+        main_app.get_arg("metric_name"),
+    )
+    main_app.context.add_context(c4)  # type: ignore
 
     if main_app.args_parser.error:  # type: ignore
         print("MAIN APP ERROR: ", main_app.args_parser.error)  # type: ignore
