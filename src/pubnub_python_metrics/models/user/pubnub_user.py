@@ -2,7 +2,11 @@
 from .auth_user import AuthUser
 from ...api.pubnub import internal_rest_api as api
 from ...models.metrics.metric_parser import MetricParser
-from ...models.metrics.metric_pandas import MetricPandas, MetricAttr
+from ...models.metrics.metric_pandas import MetricPandas, MetricAttrEnum
+
+# from ...models.metrics.metric_model import Metric
+from ...models.metrics import metric_csv_parser as mcp
+from ...static.csv_utils import get_csv_file_path
 
 
 class PubNubUser(AuthUser):
@@ -109,11 +113,11 @@ class PubNubUser(AuthUser):
         return metrics
 
     def all_metrics_total_by_attr(self, start, end, attr, value):
-        if not hasattr(MetricAttr, str(attr)):
+        if not hasattr(MetricAttrEnum, str(attr)):
             print(f"Invalid attribute {attr}. Available attrs: ", end="")
-            print(" ".join([e.name for e in MetricAttr]))
+            print(" ".join([e.name for e in MetricAttrEnum]))
             return None
-        attr = MetricAttr[attr].value  # overwrite attr with enum value
+        attr = MetricAttrEnum[attr].value  # overwrite attr with enum value
         print(attr)
         _pandas_metrics = self.all_metrics_pandas(start, end)
         metrics = []
@@ -125,3 +129,47 @@ class PubNubUser(AuthUser):
             print(error)
             return None
         return metrics
+
+    def all_metrics_total_by_attr_enriched(self, start, end, attr, value):
+        if not hasattr(MetricAttrEnum, str(attr)):
+            print(f"Invalid attribute {attr}. Available attrs: ", end="")
+            print(" ".join([e.name for e in MetricAttrEnum]))
+            return None
+        attr = MetricAttrEnum[attr].value  # overwrite attr with enum value
+        print(attr)
+        _pandas_metrics = self.all_metrics_pandas(start, end)
+        metrics = []
+        try:
+            for m in _pandas_metrics:  # type: ignore
+                # Do not enrich - get value as is
+                if attr == "name":
+                    metrics.append([x for x in m if getattr(x, attr) == value])
+                    continue
+                # By tx_type example
+                # Enrich metrics
+                if attr == "tx_type":
+                    df = mcp.read_csv_file(get_csv_file_path("tx_type"))
+                    tx = mcp.validate_csv_tx_type(df)
+                    for metric in m:
+                        metric.enrich("tx_type", tx)
+                    metrics.append([x for x in m if getattr(x, "type") == value])
+                    continue
+                # By anything else
+                # if attr == "type":
+                df = mcp.read_csv_file("tx_api")
+                tx = mcp.validate_csv_tx_api(df)
+                for metric in m:
+                    metric.enrich("tx_api", tx)
+                metrics.append([x for x in m if getattr(x, attr) == value])
+        except Exception as error:
+            print(error)
+            return None
+        return metrics
+
+    def add_csv_files(self):
+        csv_files = ["tx_api", "tx_type", "msg_type", "msg_size", "misc", "all"]
+        for f in csv_files:
+            if hasattr(mcp.CsvFileTypes, f):
+                print("Found file: ", f)
+                df = mcp.read_csv_file(f)
+                parsed = mcp.validate_csv_tx_api(df)

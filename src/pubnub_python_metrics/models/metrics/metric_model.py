@@ -1,7 +1,17 @@
 from pydantic import BaseModel, Field, constr
 import pandas as pd
+from enum import Enum
 from pydantic.main import ModelMetaclass
 from typing import List, Optional
+
+
+class CsvFileType(str, Enum):
+    tx_api = 0  # StrictCsvTxApi
+    tx_type = 1  # StrictCsvTxType
+    msg_type = 2  # StrictCsvTxName
+    msg_size = 3  # StrictCsvTxName
+    misc = 4  # StrictCsvTxName
+    all = 5  # StrictCsvTxName
 
 
 class Metric(BaseModel):
@@ -12,6 +22,22 @@ class Metric(BaseModel):
     label: Optional[str] = Field(None, alias="label")
     description: Optional[str] = Field(None, alias="description")
     total: Optional[float] = Field(None, alias="total")
+
+    def enrich(self, csv_file_type: CsvFileType, tx: pd.DataFrame):
+        tx = tx.loc[tx["metric"] == self.name]
+        if not tx.empty:
+            if csv_file_type == "tx_api":
+                tx = validate_metric(tx)
+                self.type = tx["type"].values[0]
+                self.feature = tx["feature"].values[0]
+                self.action = tx["action"].values[0]
+                self.label = tx["label"].values[0]
+                self.description = tx["description"].values[0]
+                return self
+            if csv_file_type == "tx_type":
+                tx = validate_metric(tx)
+                self.type = tx["type"].values[0]
+                return self
 
 
 class StrictCsvTxName(BaseModel):
@@ -40,7 +66,7 @@ class StrictPnApiMetric(BaseModel):
     total: float = Field(..., alias="sum")
 
 
-class StrictPnMetric(BaseModel):
+class StrictPnMetric(Metric):
     name: str
     total: float
 
@@ -84,3 +110,8 @@ def validate_data_schema(data_schema: ModelMetaclass):
         return wrapper
 
     return Inner
+
+
+@validate_data_schema(data_schema=Metric)
+def validate_metric(df) -> pd.DataFrame:
+    return df

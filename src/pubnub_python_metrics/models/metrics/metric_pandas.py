@@ -58,12 +58,13 @@ class MetricPandas:
             return None
 
 
-class MetricAttr(Enum):
+class MetricAttrEnum(Enum):
     metric_name = "name"
     metric_type = "type"
     metric_feature = "feature"
     metric_action = "action"
     metric_label = "label"
+    metric_tx_type = "tx_type"
 
 
 @staticmethod

@@ -58,6 +58,7 @@ def main(args=None):
                 "all_pandas",
                 "all_total_by_name",
                 "all_total_by_attr",
+                "all_total_by_attr_enriched",
             ]
         )
         .args_parser.add_argument(
@@ -69,8 +70,12 @@ def main(args=None):
         .add_argument("--all-pandas", action="store_true", help="By date pandas")
         .add_argument("--all-total-by-name", action="store_true", help="By metric name")
         .add_argument("--all-total-by-attr", type=str, help="By metric attribute")
+        .add_argument(
+            "--all-total-by-attr-enriched",
+            type=str,
+            help="By metric attribute enriched",
+        )
         .add_argument("-name", "--metric-name", type=str, help="Metric name")
-        # .add_argument("-attr", "--metric-attr", type=str, help="Metric attribute")
         .add_argument(
             "-email", "--pn-console-email", type=str, help="PubNub Console email"
         )
@@ -131,7 +136,7 @@ def main(args=None):
     )
     main_app.context.add_context(c3)  # type: ignore
 
-    # total_by
+    # total_by_attr
     c4 = CF.new_context_one_new_command(
         "all_total_by_attr",
         "get_all_total_by_attr",
@@ -142,6 +147,18 @@ def main(args=None):
         main_app.get_arg("metric_name"),
     )
     main_app.context.add_context(c4)  # type: ignore
+
+    # total_by_attr_enriched
+    c5 = CF.new_context_one_new_command(
+        "all_total_by_attr_enriched",
+        "get_all_total_by_attr_enriched",
+        pu.all_metrics_total_by_attr_enriched,
+        start,
+        end,
+        main_app.get_arg("all_total_by_attr_enriched"),
+        main_app.get_arg("metric_name"),
+    )
+    main_app.context.add_context(c5)  # type: ignore
 
     if main_app.args_parser.error:  # type: ignore
         print("MAIN APP ERROR: ", main_app.args_parser.error)  # type: ignore

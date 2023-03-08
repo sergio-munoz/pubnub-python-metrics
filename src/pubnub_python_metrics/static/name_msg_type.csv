@@ -1,0 +1,16 @@
+metric
+history_msgs
+history_msgs_non_ssl
+history_msgs_ssl
+msgs_total
+msgs_total_non_ssl
+msgs_total_ssl
+publish
+publish_non_ssl
+publish_ssl
+push
+subscribe_msgs
+subscribe_msgs_non_ssl
+subscribe_msgs_ssl
+apns_sent
+fcm_sent

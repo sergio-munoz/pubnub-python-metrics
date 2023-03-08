@@ -1,6 +1,7 @@
 from enum import Enum
 import pandas as pd
 from .metric_model import (
+    Metric,
     validate_data_schema,
     StrictCsvTxApi,
     StrictCsvTxType,
@@ -9,13 +10,43 @@ from .metric_model import (
 )
 
 
+@validate_data_schema(data_schema=Metric)
+def validate_metric(df) -> pd.DataFrame:
+    return df
+
+
 class CsvFileTypes(str, Enum):
-    tx_api = "tx_api"  # StrictCsvTxApi
-    tx_type = "tx_type"  # StrictCsvTxType
-    msg_type = "msg_type"  # StrictCsvTxName
-    msg_size = "msg_size"  # StrictCsvTxName
-    misc = "misc"  # StrictCsvTxName
-    all = "all"  # StrictCsvTxName
+    tx_api = 0  # StrictCsvTxApi
+    tx_type = 1  # StrictCsvTxType
+    msg_type = 2  # StrictCsvTxName
+    msg_size = 3  # StrictCsvTxName
+    misc = 4  # StrictCsvTxName
+    all = 5  # StrictCsvTxName
+
+
+# List-Backed Properties Iterator Pattern
+class CsvMetrics:
+    _tx_api = 0
+    _tx_type = 1
+    _msg_type = 2
+    _msg_size = 3
+    _misc = 4
+    _all = 5
+
+    def __init__(self) -> None:
+        # From enum
+        self.csv_metrics = [None, None, None, None, None, None]
+
+    @property
+    def tx_api(self):
+        return self.csv_metrics[CsvFileTypes.tx_api.value]
+
+    @tx_api.setter
+    def tx_api(self, value):
+        self.csv_metrics[CsvFileTypes.tx_api.value] = value
+
+    def get_as_metric_tx(self, csv_file_type: CsvFileTypes, tx: pd.DataFrame, spm):
+        pass
 
 
 def read_csv_file(csv_file) -> pd.DataFrame:

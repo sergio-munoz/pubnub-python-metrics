@@ -1,0 +1,8 @@
+metric,type
+replicated,rep
+edge,edg
+message_actions,ma
+signals,sig
+free,fre
+transactions_total,tot
+transaction_xhr,fun
