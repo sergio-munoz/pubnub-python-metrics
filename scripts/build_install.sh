@@ -13,7 +13,7 @@ parentdir="$(dirname "$dir")"
 # Parse file containing version
 file=${parentdir}/${package_name}/src/${package_src}/__about__.py
 name=$(<"$file")       #the output of 'cat $file' is assigned to the $name variable
-version=$(echo $name | cut -d \' -f2)
+version=$(echo $name | cut -d \" -f2)  # might need to cut by \' instead of \"
 
 # Build package
 hatch build

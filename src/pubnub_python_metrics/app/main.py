@@ -1,5 +1,4 @@
 import sys
-import json
 
 from probable_fiesta.config.variables import DotEnvDef as ded
 from probable_fiesta.config.builder.config_builder import ConfigBuilder
@@ -8,7 +7,6 @@ from probable_fiesta.app.builder.context_factory import ContextFactory as CF
 from probable_fiesta.app.builder.app_builder import AppBuilder
 
 from ..models.user.pubnub_user import PubNubUser
-from ..models.metrics.metric_pandas import MetricPandas
 
 
 class MyDotEnvDef(ded):
@@ -53,13 +51,31 @@ def main(args=None):
     main_app = (
         aB.name.set_name("main_app")
         .arguments.set_arguments(args)
-        .set_executables(["version", "all_date"])
+        .set_executables(
+            [
+                "version",
+                "all_date",
+                "all_pandas",
+                "all_total_by_name",
+                "all_total_by_attr",
+                "all_total_by_attr_enriched",
+            ]
+        )
         .args_parser.add_argument(
             "--version", action="store_true", help="show version builder"
         )
         .add_argument("-start", "--date-start", type=str, help="Start date")
         .add_argument("-end", "--date-end", type=str, help="End date")
         .add_argument("--all-date", action="store_true", help="By date")
+        .add_argument("--all-pandas", action="store_true", help="By date pandas")
+        .add_argument("--all-total-by-name", action="store_true", help="By metric name")
+        .add_argument("--all-total-by-attr", type=str, help="By metric attribute")
+        .add_argument(
+            "--all-total-by-attr-enriched",
+            type=str,
+            help="By metric attribute enriched",
+        )
+        .add_argument("-name", "--metric-name", type=str, help="Metric name")
         .add_argument(
             "-email", "--pn-console-email", type=str, help="PubNub Console email"
         )
@@ -77,27 +93,72 @@ def main(args=None):
         .build()
     )
 
-    # get from arguments or dotenv
-    # Note: arguments have priority over dotenv
+    # Get arguments from CLI or dotenv
     pu = create_pubnub_user(
         main_app.get_arg("PN_CONSOLE_EMAIL"), main_app.get_arg("PN_CONSOLE_PASSWORD")
     )
-    # print("pu: ", pu)
+    # Authenticate user
     if not pu:
-        print("PubNub user not authenticated. Trying to run anyways...")
-        # return None
-    else:
-        # Create context with new command
-        start = main_app.get_arg("date_start")
-        end = main_app.get_arg("date_end")
-        c1 = CF.new_context_one_new_command(
-            "all_date",
-            "get_all_metrics_by_date",
-            pu.get_apps(),
-            start,
-            end,
-        )
-        main_app.context.add_context(c1)  # type: ignore
+        print("PubNub user not authenticated")
+        return
+
+    # Add commands after passing authentication
+    # all_metrics
+    start = main_app.get_arg("date_start")
+    end = main_app.get_arg("date_end")
+    c1 = CF.new_context_one_new_command(
+        "all_date",
+        "get_all_metrics_by_date",
+        pu.get_apps(),
+        start,
+        end,
+    )
+    main_app.context.add_context(c1)  # type: ignore
+
+    # all_pandas
+    c2 = CF.new_context_one_new_command(
+        "all_pandas",
+        "get_all_metrics_pandas",
+        pu.all_metrics_pandas,
+        start,
+        end,
+    )
+    main_app.context.add_context(c2)  # type: ignore
+
+    # total_by_metric
+    c3 = CF.new_context_one_new_command(
+        "all_total_by_name",
+        "get_all_total_by_name",
+        pu.all_metrics_total_by_name,
+        start,
+        end,
+        main_app.get_arg("metric_name"),
+    )
+    main_app.context.add_context(c3)  # type: ignore
+
+    # total_by_attr
+    c4 = CF.new_context_one_new_command(
+        "all_total_by_attr",
+        "get_all_total_by_attr",
+        pu.all_metrics_total_by_attr,
+        start,
+        end,
+        main_app.get_arg("all_total_by_attr"),
+        main_app.get_arg("metric_name"),
+    )
+    main_app.context.add_context(c4)  # type: ignore
+
+    # total_by_attr_enriched
+    c5 = CF.new_context_one_new_command(
+        "all_total_by_attr_enriched",
+        "get_all_total_by_attr_enriched",
+        pu.all_metrics_total_by_attr_enriched,
+        start,
+        end,
+        main_app.get_arg("all_total_by_attr_enriched"),
+        main_app.get_arg("metric_name"),
+    )
+    main_app.context.add_context(c5)  # type: ignore
 
     if main_app.args_parser.error:  # type: ignore
         print("MAIN APP ERROR: ", main_app.args_parser.error)  # type: ignore
