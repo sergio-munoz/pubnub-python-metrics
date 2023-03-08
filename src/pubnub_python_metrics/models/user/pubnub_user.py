@@ -145,23 +145,44 @@ class PubNubUser(AuthUser):
                 if attr == "name":
                     metrics.append([x for x in m if getattr(x, attr) == value])
                     continue
-                # By tx_type example
-                # Enrich metrics
+                # By tx_type
                 if attr == "tx_type":
                     df = mcp.read_csv_file(get_csv_file_path("tx_type"))
                     tx = mcp.validate_csv_tx_type(df)
                     for metric in m:
-                        metric.enrich("tx_type", tx)
+                        metric.enrich("tx_type", tx)  # enrich metrics
                     # get by attr == "type": because tx_type does not exist
                     metrics.append([x for x in m if getattr(x, "type") == value])
                     continue
-                # By anything else
-                df = mcp.read_csv_file(get_csv_file_path("tx_api"))
-                tx = mcp.validate_csv_tx_api(df)
+                # By tx_api
+                if attr == "tx_type":
+                    df = mcp.read_csv_file(get_csv_file_path("tx_api"))
+                    tx = mcp.validate_csv_tx_api(df)
+                    for metric in m:
+                        metric.enrich("tx_api", tx)  # enrich metrics
+                    # get by attr == "type": because tx_type does not exist
+                    metrics.append([x for x in m if getattr(x, "type") == value])
+                    continue
+                # Everything else by tx_name:
+                # By msg_type
+                # df = mcp.read_csv_file(get_csv_file_path("name_msg_type"))
+                # tx = mcp.validate_csv_tx_name(df)
+                # for metric in m:
+                # r = tx.loc[tx["metric"] == metric.name]
+                # if not r.empty:
+                # metrics.append(metric)
+                # print(tx)
+                # if metric.name == tx
+                # metrics.append([x for x in m if tx.loc[tx["metric"] == x.name] is not x.empty])
+                # By msg_size, misc, all
+                # arr = ["msg_type", "msg_size", "misc", "all"]
+                # for a in arr:
+                df = mcp.read_csv_file(get_csv_file_path(f"name_{attr}"))
+                tx = mcp.validate_csv_tx_name(df)
                 for metric in m:
-                    metric.enrich("tx_api", tx)
-                # get by attr == "type": because tx_type does not exist
-                metrics.append([x for x in m if getattr(x, "type") == value])
+                    r = tx.loc[tx["metric"] == metric.name]
+                    if not r.empty:
+                        metrics.append(metric)
         except Exception as error:
             print(error)
             return None

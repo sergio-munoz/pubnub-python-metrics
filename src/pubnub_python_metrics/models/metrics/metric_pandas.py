@@ -66,6 +66,10 @@ class MetricAttrEnum(Enum):
     metric_label = "label"
     metric_tx_type = "tx_type"
     metric_tx_api = "tx_api"
+    msg_type = "msg_type"
+    msg_size = "msg_size"
+    misc = "misc"
+    all = "all"  # TODO: all is a reserved word
 
 
 @staticmethod
