@@ -152,15 +152,16 @@ class PubNubUser(AuthUser):
                     tx = mcp.validate_csv_tx_type(df)
                     for metric in m:
                         metric.enrich("tx_type", tx)
+                    # get by attr == "type": because tx_type does not exist
                     metrics.append([x for x in m if getattr(x, "type") == value])
                     continue
                 # By anything else
-                # if attr == "type":
-                df = mcp.read_csv_file("tx_api")
+                df = mcp.read_csv_file(get_csv_file_path("tx_api"))
                 tx = mcp.validate_csv_tx_api(df)
                 for metric in m:
                     metric.enrich("tx_api", tx)
-                metrics.append([x for x in m if getattr(x, attr) == value])
+                # get by attr == "type": because tx_type does not exist
+                metrics.append([x for x in m if getattr(x, "type") == value])
         except Exception as error:
             print(error)
             return None

@@ -65,6 +65,7 @@ class MetricAttrEnum(Enum):
     metric_action = "action"
     metric_label = "label"
     metric_tx_type = "tx_type"
+    metric_tx_api = "tx_api"
 
 
 @staticmethod

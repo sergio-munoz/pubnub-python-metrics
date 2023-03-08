@@ -6,7 +6,6 @@ from .metric_model import (
     StrictCsvTxApi,
     StrictCsvTxType,
     StrictCsvTxName,
-    PdVal,
 )
 
 
@@ -70,7 +69,7 @@ def validate_csv_tx_name(df) -> pd.DataFrame:
     return df
 
 
-# Dict Validator Example
-def pd_val(df):
-    _ = PdVal(df_dict=df.to_dict(orient="records"))
-    return df
+# To use a List of Dict Validator Example:
+# def pd_val(df):
+# _ = PdVal(df_dict=df.to_dict(orient="records"))
+# return df

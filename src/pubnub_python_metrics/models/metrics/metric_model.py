@@ -71,17 +71,6 @@ class StrictPnMetric(Metric):
     total: float
 
 
-# Dict Validator Example
-class DictValidator(BaseModel):
-    id: int = Field(..., ge=1)
-    name: str = Field(..., max_length=20)
-    height: float = Field(..., ge=0, le=250, description="Height in cm.")
-
-
-class PdVal(BaseModel):
-    df_dict: List[DictValidator]
-
-
 # Decorator
 def validate_data_schema(data_schema: ModelMetaclass):
     """This decorator will validate a pandas.DataFrame against the given data_schema."""
@@ -115,3 +104,12 @@ def validate_data_schema(data_schema: ModelMetaclass):
 @validate_data_schema(data_schema=Metric)
 def validate_metric(df) -> pd.DataFrame:
     return df
+
+
+# To use a List of Dict Validator Example:
+# class DictValidator(BaseModel):
+# id: int = Field(..., ge=1)
+# name: str = Field(..., max_length=20)
+# height: float = Field(..., ge=0, le=250, description="Height in cm.")
+# class PdVal(BaseModel):
+# df_dict: List[DictValidator]

@@ -106,6 +106,12 @@ curl -i http://127.0.0.1:80/v1/metrics/get_all_metrics -X POST -H 'Content-Type:
 pubnub-python-metrics --all-total-by-attr-enriched "metric_tx_type" --metric-name "edg" -start "2023-01-01" -end "2023-02-23"
 ```
 
+### Get Total of All Metrics by transaction api type message action
+
+```bash
+pubnub-python-metrics --all-total-by-attr-enriched "metric_tx_api" --metric-name "ma" -start "2023-01-01" -end "2023-02-23"
+```
+
 ### Get Total of All Metrics by name
 
 ```bash
